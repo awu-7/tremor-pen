@@ -5,6 +5,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore
 import csv
 from datetime import datetime
+import os
 
 # Setup
 PORT = "COM6"
@@ -27,9 +28,11 @@ high = 12 / nyq
 b, a = butter(4, [low, high], btype='band')
 
 # Logging
-timestamp_tag = datetime.now().strftime("%Y%m%d_%H%M%S") 
-log_filename = f"tremor_log_{timestamp_tag}.csv"    # unique timestamp -> new csv file every session
-results_filename = f"tremor_results_{timestamp_tag}.csv"
+log_dir = "log"
+os.makedirs(log_dir, exist_ok=True)
+timestamp_tag = datetime.now().strftime("%Y%m%d_%H%M%S")
+log_filename = os.path.join(log_dir, f"tremor_log_{timestamp_tag}.csv")
+results_filename = os.path.join(log_dir, f"tremor_results_{timestamp_tag}.csv")
 
 log_file = open(log_filename, "w", newline="")
 log_writer = csv.writer(log_file)
