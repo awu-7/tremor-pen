@@ -6,6 +6,7 @@ from pyqtgraph.Qt import QtCore
 import csv
 from datetime import datetime
 import os
+import time
 
 # Setup
 PORT = "COM6"
@@ -15,7 +16,6 @@ BUFFER_LEN = Fs * 2  # 2-second sliding window
 PROCESS_EVERY = 10   # process/plot every N samples
 
 ser = serial.Serial(PORT, BAUD, timeout=3)
-import time
 time.sleep(2)  # let Arduino reset after port opens
 ser.reset_input_buffer()
 
@@ -23,9 +23,10 @@ data_buffer = np.zeros((BUFFER_LEN, 6))
 
 # Bandpass filter 
 nyq = Fs / 2    # Nyquist rate
-low = 6 / nyq   # tremors are around 3-15 hz
+low = 6 / nyq   # tremors are around 6-12 hz
 high = 12 / nyq
 b, a = butter(4, [low, high], btype='band')
+
 
 # Logging
 log_dir = "log"
@@ -44,6 +45,7 @@ results_writer.writerow(["timestamp", "accelPeakFreqHz", "accelPeakAmp", "gyroPe
 
 print(f"Logging raw data to: {log_filename}")
 print(f"Logging tremor results to: {results_filename}")
+
 
 # Plot setup
 app = pg.mkQApp("Tremor Detection")
@@ -103,6 +105,7 @@ plot_gyro_FFT.hideButtons()
 
 sample_count = 0 # initialize sample count
 
+# Find peak frequency
 def find_peak(filtered_signal, Fs, band_low=3, band_high=15):
     N = len(filtered_signal)
     Y = np.fft.fft(filtered_signal)
